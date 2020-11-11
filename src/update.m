@@ -11,7 +11,10 @@ tII([1 end],:) = tII([end-1 2],:);
 
 eta   = eta0 .* max(1e-6,1-2*f).^-A .* max(1e-6,1-2*c).^-B;                % get bubble-crystal-dep. magma viscosity
 eta   = 1./(1./(eta + eta0./sqrt(etactr)) + 1./(eta0.*sqrt(etactr)));
-eta   = eta + delta.*(diff(eta([end-2,1:end,3],:),2,1)./8 + diff(eta(:,[1,1:end,end]),2,2)./8);
+for d = 1:ceil(delta)
+    dd  = delta/ceil(delta);
+    eta = eta + dd.*(diff(eta([end-2,1:end,3],:),2,1)./8 + diff(eta(:,[1,1:end,end]),2,2)./8);
+end
 etac  = (eta(1:end-1,1:end-1)+eta(2:end,1:end-1) ...                       % get viscosity in cell corners
        + eta(1:end-1,2:end  )+eta(2:end,2:end  ))./4;
     
