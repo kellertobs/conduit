@@ -45,14 +45,15 @@ it     =  0;
 
 % overwrite fields from file if restarting run
 if     restart < 0  % restart from last continuation frame
+    name = ['../out/',runID,'/',runID,'_cont'];
+    load(name,'U','W','P','f','T','c','dfdt','dTdt','rho','CL','eta','Div_V','err','ezz','erz','trr','tzz','trz','eII','tII','dt','time','step','fvol0');
     name = ['../out/',runID,'/',runID,'_par'];
     load(name);
-    name = ['../out/',runID,'/',runID,'_cont'];
-    save(name,'U','W','P','f','T','c','dfdt','dTdt','rho','CL','eta','Div_V','err','ezz','erz','trr','tzz','trz','eII','tII','dt','time','step','fvol0');
 elseif restart > 0  % restart from specified continuation frame
     name = ['../out/',runID,'/',runID,'_',num2str(restart)];
-    save(name,'U','W','P','f','T','c','dfdt','dTdt','rho','CL','eta','Div_V','err','ezz','erz','trr','tzz','trz','eII','tII','dt','time','step','fvol0');
-    load([name,'_par']);
+    load(name,'U','W','P','f','T','c','dfdt','dTdt','rho','CL','eta','Div_V','err','ezz','erz','trr','tzz','trz','eII','tII','dt','time','step','fvol0');
+    name = ['../out/',runID,'/',runID,'_par'];
+    load(name);
 end
 
 load ocean;  % load custom colormap
@@ -121,7 +122,7 @@ while time <= tend && step <= M
                                        ./rho(2:end-1,2:end-1)./CL(2:end-1,2:end-1);  
                                   
             cool   =  (T-100)./tau_c.*exp((rr-R)/4/h);                     % get constant-flux wall cooling, inflow heating
-            heat   = -(T-T0 )./dt/4 .*exp((zz-L)/4/h) .* (f>f1 & (W([end-1,1:end],:)+W([1:end,2],:))./2<0);
+            heat   = -(T-T0 )./dt/4 .*exp((zz-L)/4/h) .* (f>f1 & (W([end-1,1:end],:)+W([1:end,2],:))./2<=0);
             
             dTdt   = lapl_T  - VGrd_T - cool + heat;                       % total rate of change
             res_T  = (T-To)./dt - theta.*dTdt - (1-theta).*dTdto;          % residual temperature evolution         
