@@ -1,8 +1,8 @@
 clear;
 
 % set run parameters
-runID    =  'slug_upw3';         % run identifier
-restart  =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
+runID    =  'slug_frm';          % run identifier
+restart  =  260;                 % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
 nop      =  25;                  % output frame plotted/saved every 'nop' time steps
 plot_op  =  1;                   % switch on (1) to live plot results
 save_op  =  1;                   % switch on (1) to save output to file
@@ -49,13 +49,13 @@ tau_c    =  (R/4)^2./kT*rhom*C;  % conduit wall cooling time [s]
 % set numerical model parameters
 nup      =  50;                  % nonlinear coefficients, residual norms updated every 'nup' iterations
 CFL      =  1.0;                 % (physical) time stepping courant number (multiplies stable step) [0,1]
-ADVN     =  'UPW3';              % advection scheme ('UPW2', 'UPW3', or 'FRM')
+ADVN     =  'FRM';               % advection scheme ('UPW2', 'UPW3', or 'FRM')
 theta    =  0.50;                % time-stepping scheme selector (1=BE, 1/2=CN, 0=FE)
 rtol     =  1e-5;                % outer its relative tolerance
 atol     =  1e-8;                % outer its absolute tolerance
 maxit    =  1e4;                 % maximum outer its
-alpha    =  0.90;                % inner its step size (multiple of stable step) [0,1]
-beta     =  0.30;                % iterative damping parameter [0,1]
+alpha    =  0.75;                % inner its step size (multiple of stable step) [0,1]
+beta     =  0.25;                % iterative damping parameter [0,1]
 delta    =  1.0;                 % regularisation of viscosity
 etactr   =  1e3;                 % minimum viscosity for regularisation
 
