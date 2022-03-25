@@ -1,17 +1,17 @@
 clear;
 
 % set run parameters
-runID    =  'slug_frm';          % run identifier
-restart  =  260;                 % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
-nop      =  25;                  % output frame plotted/saved every 'nop' time steps
+runID    =  'testheatslug';      % run identifier
+restart  =  0;                   % restart from file (0: new run; <1: restart from last; >1: restart from specified frame)
+nop      =  50;                  % output frame plotted/saved every 'nop' time steps
 plot_op  =  1;                   % switch on (1) to live plot results
 save_op  =  1;                   % switch on (1) to save output to file
 plot_cv  =  1;                   % switch on (1) to live plot iterative convergence
 
 % set model domain parameters
-L        =  60;                  % conduit length
+L        =  40;                  % conduit length
 R        =  4;                   % conduit radius
-N        =  600 + 2;             % number of grid points in z-direction (incl. 2 ghosts)
+N        =  400 + 2;             % number of grid points in z-direction (incl. 2 ghosts)
 h        =  L/(N-2);             % grid spacing
  
 % set model timing parameters
@@ -21,8 +21,8 @@ dt       =  1e-2;                % initial time step [s]
 
 % set model vesicularity parameters
 SlugNo   =  3;                   % slug control number (>1 for shorter more concentrated bubbly slugs)
-f1       =  0.02;                % amplitude of random noise
-f2       =  0.20;                % amplitude of bubbly core or slug
+f1       =  0.01;                % amplitude of random noise
+f2       =  0.10;                % amplitude of bubbly core or slug
 kf       =  1e-6;                % volume diffusivity [m^2/s]
 smth     =  1/4/h^2;             % regularisation of initial bubble distribution
 
@@ -47,15 +47,16 @@ LH       =  400e3;               % latent heat [J/kg]
 tau_c    =  (R/4)^2./kT*rhom*C;  % conduit wall cooling time [s]
 
 % set numerical model parameters
-nup      =  50;                  % nonlinear coefficients, residual norms updated every 'nup' iterations
+nup      =  100;                 % nonlinear coefficients, residual norms updated every 'nup' iterations
 CFL      =  1.0;                 % (physical) time stepping courant number (multiplies stable step) [0,1]
 ADVN     =  'FRM';               % advection scheme ('UPW2', 'UPW3', or 'FRM')
 theta    =  0.50;                % time-stepping scheme selector (1=BE, 1/2=CN, 0=FE)
-rtol     =  1e-5;                % outer its relative tolerance
-atol     =  1e-8;                % outer its absolute tolerance
-maxit    =  1e4;                 % maximum outer its
-alpha    =  0.75;                % inner its step size (multiple of stable step) [0,1]
-beta     =  0.25;                % iterative damping parameter [0,1]
+rtol     =  1e-4;                % outer its relative tolerance
+atol     =  1e-6;                % outer its absolute tolerance
+maxit    =  5e3;                 % maximum outer its
+alpha    =  0.95;                % inner its step size (multiple of stable step) [0,1]
+beta     =  0.20;                % iterative damping parameter [0,1]
+zeta     =  2/3;
 delta    =  1.0;                 % regularisation of viscosity
 etactr   =  1e3;                 % minimum viscosity for regularisation
 

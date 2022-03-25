@@ -23,9 +23,9 @@ rhoBF = (rho(1:end-1,2:end-1)+rho(2:end,2:end-1))./2-mean(rho(:));         % get
 
 CL    = C + (1-f).*LH./(Tliq-Tsol) .* (T>Tsol & T<Tliq);                   % get heat capacity adjusted for latent heat
 
-dtW   = (h/2)^2./((eta(1:end-1,:)+eta(2:end,:))./2);                       % iterative step size
-dtU   = (h/2)^2./((eta(:,1:end-1)+eta(:,2:end))./2);                       % iterative step size
-dtP   = eta/2;                                                             % iterative step size
+dtW   = (h/2)^2./((1+zeta).*max(eta(1:end-1,:),eta(2:end,:)));             % iterative step size
+dtU   = (h/2)^2./((1+zeta).*max(eta(:,1:end-1),eta(:,2:end)));             % iterative step size
+dtP   = (2/3+zeta).*eta;                                                 % iterative step size
 dtT   = min((h/2)^2./kT.*rho(:).*CL(:));                                   % diffusive time step size
 dta   = min(CFL*min(h/max(abs([U(:);W(:)]+1e-16))/2));                     % advective time step size
 dt    = min(2.*dt,min(dta,dtT));                                           % physical time step size

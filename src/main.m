@@ -121,13 +121,13 @@ while time <= tend && step <= M
                                        - 1./r(2:end-1) .* ddr(rc.*qTr(2:end-1,:),h)) ...
                                        ./rho(2:end-1,2:end-1)./CL(2:end-1,2:end-1);  
                                   
-            cool   =  (T-100)./tau_c.*exp((rr-R)/4/h);                     % get constant-flux wall cooling, inflow heating
-            heat   = -(T-T0 )./dt/4 .*exp((zz-L)/4/h) .* (f>f1 & (W([end-1,1:end],:)+W([1:end,2],:))./2<=0);
+            cool   =  (T-100)./tau_c.*exp((rr-R  )/4/h);                     % get constant-flux wall cooling, inflow heating
+            heat   = -(T-T0 )./dt/4 .*exp(-(zz-3/4*L).^2/(8*h)^2) .* (f>2*f1 & (W([end-1,1:end],:)+W([1:end,2],:))./2<=0);
             
             dTdt   = lapl_T  - VGrd_T - cool + heat;                       % total rate of change
             res_T  = (T-To)./dt - theta.*dTdt - (1-theta).*dTdto;          % residual temperature evolution         
             
-            res_T([1,end],:) = res_T([end-1 2],:);                         % periodic top/bot boundaries
+            res_T([1 end],:) = res_T([end-1 2],:);                         % periodic top/bot boundaries
             res_T(:,[1 end]) = res_T(:,[2 end-1]);                         % zero-flux side boundaries
             
             T = Ti - alpha.*res_T.*dt/10 + beta.*(Ti-Tii);                 % update temperature solution
@@ -140,30 +140,26 @@ while time <= tend && step <= M
         % update z-velocity
         Div_tz = ddz(tzz(:,2:end-1),h) + ddr(trz,h);                       % get z-stress divergence
         cyl_tz = (trz(:,1:end-1)+trz(:,2:end))./2./r(:,2:end-1);           % cylindrical z-stress term
-        
-        meanW = mean(mean(W(:,2:end-1)));
-        
+                
         res_W(:,2:end-1) = - Div_tz - cyl_tz  ...                          % residual z-momentum conservation
-                           + ddz(P(:,2:end-1),h) - rhoBF.*g0  ...
-                           + meanW./dtW(:,2:end-1);                         
-
-        res_W([1 end],:) = [sum(res_W([1 end],:),1)./2; ...
-                            sum(res_W([1 end],:),1)./2];                   % periodic boundaries
+                           + ddz(P(:,2:end-1),h) - rhoBF.*g0; 
+                       
+        res_W = res_W - mean(mean(res_W(:,2:end-1)));
         res_W(:,1  ) =  res_W(:,2    );                                    % free slip inner side boundary
         res_W(:,end) = -res_W(:,end-1);                                    % no slip outer side boundary
-                
+        
         W = Wi - alpha.*res_W.*dtW + beta.*(Wi-Wii);                       % update z-velocity solution
 
         % update r-velocity        
         Div_tr = ddr(trr(2:end-1,:),h) + ddz(trz,h);                       % get r-stress divergence
         cyl_tr = (etac(1:end-1,:)+etac(2:end,:))./2./(rc+1e-3) .* ...      % cylindrical z-stress term
                  (ddr((U(2:end-1,[1,1:end])+U(2:end-1,[1:end,end]))./2,h) ...
-                 - U(2:end-1,:)./(rc+1e-3));                                      
-        
+                 - U(2:end-1,:)./(rc+1e-3));
+             
         res_U(2:end-1,:) = - Div_tr - cyl_tr ... 
                            + ddr(P(2:end-1,:),h);                          % residual r-momentum conservation
-        
-        res_U([1 end],:) = res_U([end-1 2],:);                             % periodic top/bot boundaries
+                
+        res_U([1 end],:) = res_U([end-1 2],:);                             % continuous top/bot boundaries
         res_U(:,[1 end]) = 0;                                              % no flow across side boundaries
 
 
@@ -176,11 +172,11 @@ while time <= tend && step <= M
         Div_V(:,[1 end]) = Div_V(:,[2 end-1]);                             % continuous side boundaries
         
         % update strain rates
-        err(:,2:end-1)   = ddr(U,h) - Div_V(:,2:end-1)./3;               % get r-normal strain rate
-        err([1 end],:)   = err([end-1 2],:);                               % periodic top/bot boundaries
+        err(:,2:end-1)   = ddr(U,h) + (zeta-1/3).*Div_V(:,2:end-1);        % get r-normal strain rate
+        err([1 end],:)   = err([end-1 2],:);                               % continuous top/bot boundaries
         err(:,[1 end])   = err(:,[2 end-1]);                               % continuous side boundaries
-        ezz(2:end-1,:)   = ddz(W,h) - Div_V(2:end-1,:)./3;               % get z-normal strain rate
-        ezz([1 end],:)   = ezz([end-1 2],:);                               % periodic top/bot boundaries
+        ezz(2:end-1,:)   = ddz(W,h) + (zeta-1/3).*Div_V(2:end-1,:);        % get z-normal strain rate
+        ezz([1 end],:)   = ezz([end-1 2],:);                               % continuous top/bot boundaries
         ezz(:,[1 end])   = ezz(:,[2 end-1]);                               % continuous side boundaries
         erz              = 1/2.*(ddz(U,h) + ddr(W,h));                     % get shear strain rate
 
@@ -192,7 +188,8 @@ while time <= tend && step <= M
         % update dynamic pressure        
         res_P = Div_V;                                                     % residual mass conservation
 
-        res_P([1 end],:) = res_P([end-1 2],:);                             % periodic top/bot boundaries
+        res_P = res_P - mean(mean(res_P(2:end-1,2:end-1)));
+        res_P([1 end],:) = res_P([end-1 2],:);                             % continuous top/bot boundaries
         res_P(:,[1 end]) = res_P(:,[2 end-1]);                             % continuous side boundaries
         
         P = Pi - alpha.*res_P.*dtP + beta.*(Pi-Pii);                       % update pressure solution
