@@ -2,12 +2,12 @@
 eII(2:end-1,2:end-1) = 1e-16 + (0.5.*(err(2:end-1,2:end-1).^2 + ezz(2:end-1,2:end-1).^2 ...  % get strain rate magnitude
     + 2.*(erz(1:end-1,1:end-1).^2.*erz(2:end,1:end-1).^2.*erz(1:end-1,2:end).^2.*erz(2:end,2:end).^2).^0.25)).^0.5;  
 eII(:,[1 end]) = eII(:,[end-1 2]);
-eII([1 end],:) = eII([end-1 2],:);
+eII([1 end],:) = eII([2 end-1],:);
 
 tII(2:end-1,2:end-1) = 1e-16 + (0.5.*(trr(2:end-1,2:end-1).^2 + tzz(2:end-1,2:end-1).^2 ...  % get stress magnitude
     + 2.*(trz(1:end-1,1:end-1).^2.*trz(2:end,1:end-1).^2.*trz(1:end-1,2:end).^2.*trz(2:end,2:end).^2).^0.25)).^0.5;  
 tII(:,[1 end]) = tII(:,[end-1 2]);
-tII([1 end],:) = tII([end-1 2],:);
+tII([1 end],:) = tII([2 end-1],:);
 
 eta   = eta0 .* max(1e-6,1-2*f).^-A .* max(1e-6,1-2*c).^-B;                % get bubble-crystal-dep. magma viscosity
 eta   = 1./(1./(eta + eta0./sqrt(etactr)) + 1./(eta0.*sqrt(etactr)));
@@ -21,7 +21,8 @@ etac  = (eta(1:end-1,1:end-1)+eta(2:end,1:end-1) ...                       % get
 rho   = (1-f-c).*rhom + c.*rhoc + f.*rhof;                                 % get bubble-crystal-dep. magma density
 rhoBF = (rho(1:end-1,2:end-1)+rho(2:end,2:end-1))./2-mean(rho(:));         % get relative density for bouancy force term
 
-CL    = C + (1-f).*LH./(Tliq-Tsol) .* (T>Tsol & T<Tliq);                   % get heat capacity adjusted for latent heat
+C     = (1-f-c).*Cm + c.*Cc + f.*Cf;                                       % get bubble-crystal-dep. magma heat capacity
+CL    = C + (1-f).*LH./(Tliq-Tsol) .* double(T>Tsol & T<Tliq);             % get heat capacity adjusted for latent heat
 
 dtW   = (h/2)^2./((eta(1:end-1,:)+eta(2:end,:))./2);                       % iterative step size
 dtU   = (h/2)^2./((eta(:,1:end-1)+eta(:,2:end))./2);                       % iterative step size

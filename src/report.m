@@ -27,7 +27,7 @@ end
 
 % plot convergence of outer iterations
 if plot_cv
-    figure(5); if it==0; clf; else; hold on; end
+    figure(100); if it==0; clf; else; hold on; end
     plot(it,log10(resnorm),'r.','MarkerSize',15); box on; axis tight;
     drawnow;
 end

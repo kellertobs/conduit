@@ -1,4 +1,4 @@
-clear;
+clear; close all;
 
 % set run parameters
 runID    =  'bidir_upw3';        % run identifier
@@ -16,20 +16,20 @@ h        =  L/(N-2);             % grid spacing
  
 % set model timing parameters
 M        =  1e5;                 % number of time steps to take
-tend     =  3600*24;             % end time for simulation [s]
+tend     =  3600*24*50;          % end time for simulation [s]
 dt       =  1e-2;                % initial time step [s]
 
 % set model vesicularity parameters
 SlugNo   =  1;                   % slug control number (>1 for shorter more concentrated bubbly slugs)
-f1       =  0.02;                % amplitude of random noise
-f2       =  0.20;                % amplitude of bubbly core or slug
-kf       =  1e-6;                % volume diffusivity [m^2/s]
-smth     =  1/4/h^2;             % regularisation of initial bubble distribution
+f1       =  0.00;                % amplitude of random noise
+f2       =  0.01;                % amplitude of bubbly core or slug
+kf       =  1e-7;                % volume diffusivity [m^2/s]
+smth     =  (N/100)^2;           % regularisation of initial bubble distribution
 
 % set model rheology parameters
-eta0     =  1e4;                 % background melt viscosity [Pas]
-A        = -1.0;                 % bubble weakening exponent
-B        =  2.0;                 % crystal stiffening exponent
+eta0     =  1e3;                 % background melt viscosity [Pas]
+A        = -2.0;                 % bubble weakening exponent
+B        =  3.0;                 % crystal stiffening exponent
 
 % set model buoyancy parameters
 rhom     =  2400;                % melt phase density [kg/m3]
@@ -38,11 +38,16 @@ rhof     =  200;                 % bubble phase density [kg/m3]
 g0       =  9.81;                % gravity [m/s2]
 
 % set model temperature/crystallinity parameters
+Tw       =  300;
 T0       =  1100;                % initial magma temperature [degC]
 Tsol     =  800;                 % solidus temperature [degC]
 Tliq     =  1200;                % liquidus temperature [degC]
-kT       =  8;                   % thermal diffusivity [m2/s]
-C        =  1200;                % heat capacity [J/kg/K]
+kTm      =  4;                   % thermal diffusivity [m2/s]
+kTc      =  1;                   % thermal diffusivity [m2/s]
+kTf      =  0.02;                % thermal diffusivity [m2/s]
+Cm       =  1400;                % heat capacity [J/kg/K]
+Cc       =  1000;                % heat capacity [J/kg/K]
+Cf       =  2000;                % heat capacity [J/kg/K]
 LH       =  400e3;               % latent heat [J/kg]
 tau_c    =  (R/4)^2./kT*rhom*C;  % conduit wall cooling time [s]
 

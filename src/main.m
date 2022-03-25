@@ -38,7 +38,7 @@ err    =  0.*P;  ezz = 0.*P;  erz = zeros(size(f)-1);  eII = 0.*P;
 trr    =  0.*P;  tzz = 0.*P;  trz = zeros(size(f)-1);  tII = 0.*P; 
 
 % initialise timing and iterative parameters
-step   =  1;
+step   =  0;
 time   =  0;
 dt     =  dt/2;
 it     =  0;
@@ -80,7 +80,8 @@ while time <= tend && step <= M
     it       = 0;
     
     % non-linear iteration loop
-    while resnorm/resnorm0 >= rtol && resnorm >= atol && it <= maxit || it <= nup
+    startup = 2*double(step<=0) + double(step>0);
+    while resnorm/resnorm0 >= rtol^startup && resnorm >= atol/startup && it <= maxit*startup || it <= nup
                 
         % store previous iterative solutions   
         Uii = Ui;  Ui = U;
@@ -115,8 +116,8 @@ while time <= tend && step <= M
             % update temperature
             a = T; advection; VGrd_T = advn;                               % get upwind advection term
             
-            qTz    = - kT .* ddz(T,h);                                     % z-heat diffusion flux
-            qTr    = - kT .* ddr(T,h);                                     % r-heat diffusion flux
+            qTz    = - (kT(1:end-1,:)+kT(2:end,:))./2 .* ddz(T,h);                                     % z-heat diffusion flux
+            qTr    = - (kT(:,1:end-1)+kT(:,2:end))./2 .* ddr(T,h);                                     % r-heat diffusion flux
             lapl_T(2:end-1,2:end-1) = (- ddz(qTz(:,2:end-1),h) ...         % laplacian term
                                        - 1./r(2:end-1) .* ddr(rc.*qTr(2:end-1,:),h)) ...
                                        ./rho(2:end-1,2:end-1)./CL(2:end-1,2:end-1);  
@@ -141,7 +142,7 @@ while time <= tend && step <= M
         Div_tz = ddz(tzz(:,2:end-1),h) + ddr(trz,h);                       % get z-stress divergence
         cyl_tz = (trz(:,1:end-1)+trz(:,2:end))./2./r(:,2:end-1);           % cylindrical z-stress term
         
-        meanW = mean(mean(W(:,2:end-1)));
+        meanW = sum(sum(r(2:end-1).*W(:,2:end-1)))./sum(sum(r(2:end-1).*ones(size(W(:,2:end-1)))));
         
         res_W(:,2:end-1) = - Div_tz - cyl_tz  ...                          % residual z-momentum conservation
                            + ddz(P(:,2:end-1),h) - rhoBF.*g0  ...
@@ -160,6 +161,8 @@ while time <= tend && step <= M
                  (ddr((U(2:end-1,[1,1:end])+U(2:end-1,[1:end,end]))./2,h) ...
                  - U(2:end-1,:)./(rc+1e-3));                                      
         
+        meanU = sum(sum(rc.*U(2:end-1,:)))./sum(sum(rc.*ones(size(U(2:end-1,:)))));
+
         res_U(2:end-1,:) = - Div_tr - cyl_tr ... 
                            + ddr(P(2:end-1,:),h);                          % residual r-momentum conservation
         
@@ -191,6 +194,7 @@ while time <= tend && step <= M
         
         % update dynamic pressure        
         res_P = Div_V;                                                     % residual mass conservation
+        meanP = sum(sum(r(2:end-1).*P(2:end-1,2:end-1)))./sum(sum(r(2:end-1).*ones(size(P(2:end-1,2:end-1)))));
 
         res_P([1 end],:) = res_P([end-1 2],:);                             % periodic top/bot boundaries
         res_P(:,[1 end]) = res_P(:,[2 end-1]);                             % continuous side boundaries
@@ -217,12 +221,12 @@ while time <= tend && step <= M
     fprintf(1,'         min W   = %1.4f;    mean W   = %1.4f;    max W   = %1.4f;   [m/s]\n'  ,min(-W(:) ),mean(-W(:) ),max(-W(:) ));
     fprintf(1,'         min P   = %2.4f;   mean P   = %2.4f;    max P   = %2.4f;  [kPa]\n\n',min(P(:)./1e3),mean(P(:)./1e3),max(P(:)./1e3));
 
+    % plot results
+    if ~mod(step,nop); output; end
+    
     % increment time/step
     time = time+dt;
     step = step+1;
-    
-    % plot results
-    if ~mod(step,nop); output; end
     
 end
 
