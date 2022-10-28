@@ -122,31 +122,22 @@ if plot_op
 end
 
 % plot model history
-fh5 = figure(5);
+fh5 = figure(5); clf;
 if it > 0 % don't plot before solver has run first time
 subplot(4,1,1);
-Qcool = -sum(kTc .* (T(2:end-1,end)-T(2:end-1,end-1))/h * h*2*pi*R);
-% Qcool = sum(sum(rho(2:end-1,2:end-1).*C(2:end-1,2:end-1).*cool(2:end-1,2:end-1).*h^2*2*pi.*r(2:end-1)));
-Qadvb = sum(sum((rho(1  ,2:end-1)+rho(2    ,2:end-1))/2.*(C(1  ,2:end-1)+C(2    ,2:end-1))/2.*(T(1  ,2:end-1)+T(2    ,2:end-1))/2.*W(1  ,2:end-1).*h*2*pi.*r(2:end-1)));
-Qadvt = sum(sum((rho(end,2:end-1)+rho(end-1,2:end-1))/2.*(C(end,2:end-1)+C(end-1,2:end-1))/2.*(T(end,2:end-1)+T(end-1,2:end-1))/2.*W(end,2:end-1).*h*2*pi.*r(2:end-1)));
-Qheat = Qadvt - Qadvb;
-% Qheat = sum(sum(rho(2:end-1,2:end-1).*C(2:end-1,2:end-1).*heat(2:end-1,2:end-1).*h^2*2*pi.*r(2:end-1)));
-plot(time./3600,Qcool./1e6,'bo','MarkerSize',5,'LineWidth',2); hold on; axis tight; box on;
-plot(time./3600,Qheat./1e6,'ro','MarkerSize',5,'LineWidth',2); hold on; axis tight; box on;
+semilogy(hist.time./3600,hist.Qcool./1e6,'b-','MarkerSize',5,'LineWidth',2); hold on; axis tight; box on;
+semilogy(hist.time./3600,max(1e-6,hist.Qheat./1e6),'r-','MarkerSize',5,'LineWidth',2);
 ylabel('$Q_{h,c}$ [MW]',TX{:},FS{:});
 subplot(4,1,2);
-meanT = sum(sum(r(2:end-1).*T(2:end-1,2:end-1)))./sum(sum(r(2:end-1).*ones(size(P(2:end-1,2:end-1)))));
-plot(time./3600,meanT,'ko','MarkerSize',5,'LineWidth',2); hold on; axis tight; box on;
+plot(hist.time./3600,hist.meanT,'k-','MarkerSize',5,'LineWidth',2); hold on; axis tight; box on;
 ylabel('$T$ [$^\circ$C]',TX{:},FS{:});
 subplot(4,1,3);
-rmsV = sqrt(sum(W(:).^2)+sum(U(:).^2))./sqrt(length(W(:)));
-plot(time./3600,rmsV,'ko','MarkerSize',5,'LineWidth',2); hold on; axis tight; box on;
-ylabel('$\mathbf{V}$ [m/s]',TX{:},FS{:});
-subplot(4,1,4);
-meanf = sum(sum(r(2:end-1).*f(2:end-1,2:end-1)))./sum(sum(r(2:end-1).*ones(size(P(2:end-1,2:end-1)))));
-plot(time./3600,meanf,'ko','MarkerSize',5,'LineWidth',2); hold on; axis tight; box on;
-xlabel('Time [hr]',TX{:},FS{:});
+plot(hist.time./3600,hist.meanf,'k-','MarkerSize',5,'LineWidth',2); hold on; axis tight; box on;
 ylabel('$\phi$ [vol]',TX{:},FS{:});
+subplot(4,1,4);
+plot(hist.time./3600,hist.meanV,'k-','MarkerSize',5,'LineWidth',2); hold on; axis tight; box on;
+xlabel('Time [hr]',TX{:},FS{:});
+ylabel('$\mathbf{V}$ [m/s]',TX{:},FS{:});
 end
 
 % save output to file
